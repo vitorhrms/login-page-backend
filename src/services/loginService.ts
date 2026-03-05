@@ -2,6 +2,7 @@ import { users } from '@/utils/users';
 
 export const loginService = async (user: string, pass: string) => {
   try {
+    // TODO: change function to search on sqlite
     const foundUser = users.find((u) => (u.user === user || u.email === user) && u.pass === pass);
 
     return {

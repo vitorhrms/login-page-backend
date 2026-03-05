@@ -1,3 +1,4 @@
+// TODO: create table on sqlite
 export const users = [
   { id: 1, user: 'vitor', email: 'vitor@gmail.com', pass: '123' },
   {
