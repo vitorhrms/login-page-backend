@@ -10,4 +10,4 @@ logs
 # VSCode directory
 .vscode
 
-.sqlite
+database.sqlite
