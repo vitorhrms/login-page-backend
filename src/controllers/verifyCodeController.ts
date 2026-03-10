@@ -1,8 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { VerifyCodeRequestData, validateVerifyCodeRequest } from '../validator/index';
 import { verifyCodeService } from '@/services/verifyCodeService';
+import { findUserByEmail } from '@/repositories/userRepository';
+import { disableCode } from '@/repositories/mfaRepository';
 
-export const sendEmailController = async (req: FastifyRequest, reply: FastifyReply) => {
+export const verifyCodeController = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
     const requestData = req.body as VerifyCodeRequestData;
 
@@ -16,15 +18,27 @@ export const sendEmailController = async (req: FastifyRequest, reply: FastifyRep
       return;
     }
 
-    const { code } = requestData;
+    const { code, email } = requestData;
 
-    const response = await verifyCodeService(code);
+    const user = findUserByEmail(email);
 
-    reply.code(200).send({
-      success: true,
-      data: {
-        canAccess: response?.canAccess,
-      },
+    if (user) {
+      const user_id = user.id;
+      const response = await verifyCodeService(user_id, code);
+      if (response.canAccess) {
+        disableCode(user_id);
+      }
+      reply.code(200).send({
+        success: true,
+        data: {
+          canAccess: response.canAccess,
+        },
+      });
+    }
+
+    reply.code(401).send({
+      success: false,
+      error: 'Usuário não encontrado',
     });
   } catch (error: any) {
     reply.code(500).send({

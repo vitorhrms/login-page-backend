@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import fastify from 'fastify';
 import { ZodError } from 'zod';
 import { errorHandler } from './middlewares/errorHandler';
+import { createTables } from './database/migrate';
 
 export const app = fastify();
 app.register(cors, {
@@ -18,6 +19,9 @@ app.register(cors, {
     'x-access-token',
   ],
 });
+
+createTables();
+
 app.register(appRoutes, { prefix: '/api' });
 
 app.setErrorHandler(async (err, request, reply) => {

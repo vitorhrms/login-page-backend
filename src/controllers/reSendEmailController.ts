@@ -1,8 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { SendEmailRequestData, validateSendEmailRequest } from '../validator/index';
 import { sendEmailService } from '@/services/sendEmailService';
+import { findUserByEmail } from '@/repositories/userRepository';
+import { disableCode, newCode } from '@/repositories/mfaRepository';
 
-export const sendEmailController = async (req: FastifyRequest, reply: FastifyReply) => {
+export const reSendEmailController = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
     const requestData = req.body as SendEmailRequestData;
 
@@ -18,12 +20,20 @@ export const sendEmailController = async (req: FastifyRequest, reply: FastifyRep
 
     const { email } = requestData;
 
-    const response = await sendEmailService(email);
+    const foundUser = findUserByEmail(email);
+
+    if (foundUser) {
+      disableCode(foundUser.id);
+
+      const code = Math.floor(100000 + Math.random() * 999999);
+      newCode(foundUser.id, code);
+      await sendEmailService(foundUser.email, code);
+    }
 
     reply.code(200).send({
       success: true,
       data: {
-        emailSent: response?.emailSent,
+        emailSent: true,
       },
     });
   } catch (error: any) {

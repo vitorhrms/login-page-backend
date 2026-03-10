@@ -1,11 +1,14 @@
 import { loginController } from '@/controllers/loginController';
+import { registerController } from '@/controllers/registerController';
+import { reSendEmailController } from '@/controllers/reSendEmailController';
+import { verifyCodeController } from '@/controllers/verifyCodeController';
 import { FastifyInstance } from 'fastify';
 
 const routes = async (app: FastifyInstance): Promise<void> => {
+  app.post('/register', registerController);
   app.post('/login', loginController);
-  app.post('/sendEmail', loginController);
-  app.post('/verifyCode', loginController);
-
+  app.post('/verifyCode', verifyCodeController);
+  app.post('/reSendEmail', reSendEmailController);
 
   app.get('/health', async (req, reply) => {
     return reply.code(200).send({

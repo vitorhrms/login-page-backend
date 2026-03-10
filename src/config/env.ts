@@ -5,6 +5,8 @@ dotenv.config();
 
 const envSchema = z.object({
   PORT: z.coerce.number().default(3333),
+  EMAIL_PASS: z.string(),
+  EMAIL_USER: z.string(),
 });
 
 const _env = envSchema.safeParse(process.env);
