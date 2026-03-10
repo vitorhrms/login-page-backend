@@ -2,6 +2,7 @@ import { registerService } from '@/services/registerService';
 import { registerRequestData, validateRegisterRequest } from '@/validator';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { hash } from 'bcrypt';
+import { findUserByEmail, findUserByUser } from '@/repositories/userRepository';
 
 export const registerController = async (req: FastifyRequest, reply: FastifyReply) => {
   try {
@@ -21,12 +22,39 @@ export const registerController = async (req: FastifyRequest, reply: FastifyRepl
 
     const encryptPass = await hash(pass, 10);
 
+    let foundUser = findUserByUser(user);
+    if (foundUser) {
+      reply.code(200).send({
+        success: false,
+        data: {
+          success: false,
+          error: 'user',
+          msg: 'User already in use',
+        },
+      });
+    }
+
+    if (!foundUser) {
+      foundUser = findUserByEmail(email);
+      if (foundUser) {
+        reply.code(200).send({
+          success: false,
+          data: {
+            success: false,
+            error: 'email',
+            msg: 'Email already in use',
+          },
+        });
+      }
+    }
+
     const response = await registerService(user, email, encryptPass);
 
-    reply.code(200).send({
+    reply.code(201).send({
       success: true,
       data: {
-        success: response.success,
+        success: true,
+        data: response.success,
       },
     });
   } catch (error: any) {

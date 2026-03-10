@@ -24,7 +24,7 @@ export function getCodeByUserId(user_id: number) {
     SELECT otp_hash FROM mfa_challenges
     WHERE user_id = ?
     AND used != 1
-    AND expires_at < strftime('%s','now')
+    AND expires_at > strftime('%s','now')
     ORDER BY id DESC
     LIMIT 1;
   `);
